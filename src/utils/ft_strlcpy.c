@@ -1,28 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strchr.c                                        :+:      :+:    :+:   */
+/*   ft_strlcpy.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ibondarc <ibondarc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/12 12:49:42 by ibondarc          #+#    #+#             */
-/*   Updated: 2024/12/27 12:53:38 by ibondarc         ###   ########.fr       */
+/*   Created: 2024/12/17 11:18:14 by ibondarc          #+#    #+#             */
+/*   Updated: 2024/12/27 12:54:40 by ibondarc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/so_long.h"
 
-char	*ft_strchr(char *s, int c)
+int	ft_strlcpy(char *dst, const char *src, int size)
 {
-	while (*s)
+	int	i;
+	int	srclen;
+
+	i = 0;
+	srclen = ft_strlen(src);
+	if (size > 0)
 	{
-		if (*s == (char)c)
+		while (src[i] != '\0' && i < size - 1)
 		{
-			return ((char *)s);
+			dst[i] = src[i];
+			i++;
 		}
-		s++;
+		dst[i] = '\0';
 	}
-	if ((char)c == '\0')
-		return ((char *)s);
-	return (NULL);
+	return (srclen);
 }

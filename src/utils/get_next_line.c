@@ -3,104 +3,62 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: igoryan <igoryan@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ibondarc <ibondarc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 14:24:26 by ibondarc          #+#    #+#             */
-/*   Updated: 2024/12/12 12:37:33 by igoryan          ###   ########.fr       */
+/*   Updated: 2024/12/27 12:54:47 by ibondarc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/so_long.h"
 
-static char	*fill_buf_by_line(int fd, char *total_str, char *buffer);
-static char	*extract_line(char *line_buffer);
-static char	*allocate_buffer(size_t size);
+int		fill_buf_by_line(int fd, char **line);
+char	*allocate_buffer(size_t size);
 
-char	*get_next_line(int fd)
+int	get_next_line(int fd, char **line)
 {
-	static char	*total_str;
-	char		*line;
-	char		*buffer;
+	int	res;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-	{
-		free(total_str);
-		total_str = NULL;
-		return (NULL);
-	}
-	buffer = allocate_buffer(BUFFER_SIZE);
-	line = fill_buf_by_line(fd, total_str, buffer);
-	free(buffer);
-	buffer = NULL;
-	if (!line)
-		return (NULL);
-	total_str = extract_line(line);
-	return (line);
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (-1);
+	res = fill_buf_by_line(fd, line);
+	return (res);
 }
 
-static char	*fill_buf_by_line(int fd, char *total_str, char *buffer)
+int	fill_buf_by_line(int fd, char **line)
 {
 	ssize_t	buf_read;
 	char	*temp;
+	char	*buffer;
 
 	buf_read = 1;
+	buffer = allocate_buffer(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (-1);
 	while (buf_read > 0)
 	{
 		buf_read = read(fd, buffer, BUFFER_SIZE);
 		if (buf_read == -1)
-		{
-			free(total_str);
-			total_str = NULL;
-			return (NULL);
-		}
+			return (free(buffer), -1);
 		if (buf_read == 0)
 			break ;
 		buffer[buf_read] = '\0';
-		if (!total_str)
-			total_str = ft_strdup("");
-		temp = total_str;
-		total_str = ft_strjoin(temp, buffer);
+		if (!(*line))
+			*line = ft_strdup("");
+		temp = *line;
+		*line = ft_strjoin(temp, buffer);
 		free(temp);
-		if (ft_strchr(buffer, '\n'))
-			break ;
+		if (!(*line))
+			return (free(buffer), -1);
 	}
-	return (total_str);
+	return (free(buffer), 0);
 }
 
-static char	*extract_line(char *total_str)
-{
-	char	*line;
-	int	i;
-	int	j;
-
-	i = 0;
-	while (total_str[i] != '\n' && total_str[i] != '\0')
-		i++;
-	if (total_str[i] == '\0')
-		return (NULL);
-	j = 0;
-	line = allocate_buffer(ft_strlen(total_str) - i);
-	if (!line)
-		return (NULL);
-	while (j < (ft_strlen(total_str) - i))
-	{
-		line[j] = total_str[i + j + 1];
-		j++;
-	}
-	if (*line == 0)
-	{
-		free(line);
-		line = NULL;
-	}
-	total_str[i] = '\0';
-	return (line);
-}
-
-static char	*allocate_buffer(size_t size)
+char	*allocate_buffer(size_t size)
 {
 	char	*buffer;
-	
-	buffer = (char *)malloc((size + 1) * sizeof(char));
+
+	buffer = (char *)malloc((size) * sizeof(char));
 	if (!buffer)
 		return (NULL);
 	return (buffer);

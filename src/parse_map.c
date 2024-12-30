@@ -3,38 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   parse_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: igoryan <igoryan@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ibondarc <ibondarc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 16:36:50 by igoryan           #+#    #+#             */
-/*   Updated: 2024/12/12 13:26:28 by igoryan          ###   ########.fr       */
+/*   Updated: 2024/12/27 13:27:48 by ibondarc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/so_long.h"
 
-int     parse_map(t_game *game, const char *file)
+int	parse_map(t_game *game, const char *file)
 {
-    int fd;
-    int i;
-    char *line;
+	int		fd;
+	char	*line;
+	int		res;
 
-    fd = open(file, O_RDONLY);
-    if (fd < 0)
-    {
-        fprintf(stderr, "open: %s: %s (errno = %d)\n",
-            file, strerror(errno), errno);
-        exit(EXIT_FAILURE);
-    }
-    game->map = malloc(sizeof(char*) * 6);
-    while ((line = get_next_line(fd)))
-    {
-        game->map[i++] = line;
-        printf("line: %s\n", line);
-    }
-    game->map[i] = '\0';
-    game->height = i;
-    game->width = ft_strlen(game->map[0]);
-    validate_map(game);
-    close(fd);
-    return (1);
+	if (!game)
+		return (print_error("FMP"), -1);
+	line = NULL;
+	fd = open(file, O_RDONLY);
+	if (fd < 0)
+		return (print_error("IFD"), -1);
+	res = get_next_line(fd, &line);
+	if (res == -1)
+		return (print_error("FMP"), free(line), close(fd), -1);
+	if (res == 0)
+	{
+		game->map = ft_split(line, '\n');
+		free(line);
+		if (!(game->map))
+			return (print_error("FMP"), close(fd), -1);
+		game->map_height = ft_two_d_len(game->map);
+		game->map_width = ft_strlen(game->map[0]);
+		if (validate_map(game) == -1)
+			return (free_map(game->map), close(fd), -1);
+	}
+	return (close(fd), 1);
 }
